@@ -12,19 +12,8 @@ import type { ExampleSrcbookType, SessionType } from '@/types';
 import { useState } from 'react';
 import { ImportSrcbookModal } from '@/components/import-export-srcbook-modal';
 import GenerateSrcbookModal from '@/components/generate-srcbook-modal';
-import {
-  MainCTACard,
-  AppCard,
-  SrcbookCard,
-  GenerateSrcbookButton,
-  CreateSrcbookButton,
-  ImportSrcbookButton,
-  CreateAppButton,
-} from '@/components/srcbook-cards';
+import { AppCard, CreateAppButton } from '@/components/srcbook-cards';
 import DeleteSrcbookModal from '@/components/delete-srcbook-dialog';
-import { ExternalLink } from 'lucide-react';
-import { Button } from '@srcbook/components/src/components/ui/button';
-import MailingListCard from '@/components/mailing-list-card';
 import CreateAppModal from '@/components/apps/create-modal';
 import { createApp, loadApps } from '@/clients/http/apps';
 import DeleteAppModal from '@/components/delete-app-dialog';
@@ -54,8 +43,7 @@ type HomeLoaderDataType = {
 };
 
 export default function Home() {
-  const { apps, defaultLanguage, baseDir, srcbooks, examples } =
-    useLoaderData() as HomeLoaderDataType;
+  const { apps, defaultLanguage, baseDir } = useLoaderData() as HomeLoaderDataType;
   const navigate = useNavigate();
 
   const { revalidate } = useRevalidator();
@@ -127,7 +115,7 @@ export default function Home() {
       <ImportSrcbookModal open={showImportSrcbookModal} onOpenChange={setShowImportSrcbookModal} />
 
       <div>
-        <h4 className="h4 mx-auto mb-6">Apps</h4>
+        <h4 className="h4 mx-auto mb-6">Projects</h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
           <CreateAppButton
             defaultLanguage={defaultLanguage}
@@ -143,61 +131,6 @@ export default function Home() {
           ))}
         </div>
       </div>
-
-      <div>
-        <h4 className="h4 mx-auto mt-8 mb-6">New Notebook</h4>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-          <CreateSrcbookButton defaultLanguage={defaultLanguage} onSubmit={onCreateSrcbook} />
-          <GenerateSrcbookButton onClick={() => setShowGenSrcbookModal(true)} />
-          <ImportSrcbookButton onClick={() => setShowImportSrcbookModal(true)} />
-        </div>
-      </div>
-
-      {srcbooks.length > 0 && (
-        <div>
-          <h4 className="h4 mx-auto mt-8 mb-6">Your Notebooks</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {srcbooks
-              .sort((a, b) => b.openedAt - a.openedAt)
-              .map((srcbook) => (
-                <SrcbookCard
-                  key={srcbook.id}
-                  title={(srcbook.cells[0] as TitleCellType).text}
-                  running={srcbook.cells.some((c) => c.type === 'code' && c.status === 'running')}
-                  language={srcbook.language}
-                  cellCount={srcbook.cells.length}
-                  onClick={() => navigate(`/srcbooks/${srcbook.id}`)}
-                  onDelete={() => onDeleteSrcbook(srcbook)}
-                />
-              ))}
-          </div>
-        </div>
-      )}
-
-      {examples.length > 0 && (
-        <div>
-          <h4 className="h4 mt-8 mb-6">Explore</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {examples.map((example) => (
-              <MainCTACard
-                key={example.id}
-                srcbook={example}
-                onClick={() => openExampleSrcbook(example)}
-              />
-            ))}
-          </div>
-
-          <div className="mt-8 flex justify-center">
-            <a href="https://hub.srcbook.com" target="_blank">
-              <Button size="lg" variant="secondary">
-                <span className="mr-1.5">Explore all in the Hub</span>
-                <ExternalLink size={16} />
-              </Button>
-            </a>
-          </div>
-        </div>
-      )}
-      <MailingListCard />
     </div>
   );
 }

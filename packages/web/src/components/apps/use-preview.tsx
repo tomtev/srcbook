@@ -33,6 +33,7 @@ export function PreviewProvider({ channel, children }: ProviderPropsType) {
 
   useEffect(() => {
     function onStatusUpdate(payload: PreviewStatusPayloadType) {
+      console.log('Received status update:', payload);
       setUrl(payload.url);
       setStatus(payload.status);
 

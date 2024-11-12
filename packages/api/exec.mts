@@ -1,5 +1,5 @@
 import Path from 'node:path';
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 
 interface NodeError extends Error {
   code?: string;
@@ -12,6 +12,8 @@ export type BaseExecRequestType = {
   onExit: (code: number | null, signal: NodeJS.Signals | null) => void;
   onError?: (err: NodeError) => void;
 };
+
+
 
 export type NodeRequestType = BaseExecRequestType & {
   env: NodeJS.ProcessEnv;
@@ -169,4 +171,26 @@ export function vite(options: NpxRequestType) {
     command: Path.join(options.cwd, 'node_modules', '.bin', 'vite'),
     env: process.env,
   });
+}
+
+/* Run astro */
+export function astro(options: NpxRequestType) {
+  return spawnCall({
+    ...options,
+    command: Path.join(options.cwd, 'node_modules', '.bin', 'astro'),
+    args: ['dev', ...options.args],
+    env: { ...process.env, NODE_ENV: 'development' },
+  });
+}
+
+export function execAstro(options: { cwd: string; args?: string[] }) {
+  return spawn(
+    Path.join(options.cwd, 'node_modules', '.bin', 'astro'),
+    ['dev', ...(options.args || [])],
+    {
+      cwd: options.cwd,
+      env: { ...process.env, NODE_ENV: 'development' },
+      stdio: 'pipe',
+    }
+  );
 }

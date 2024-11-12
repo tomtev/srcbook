@@ -108,8 +108,10 @@ export async function createViteApp(app: DBAppType) {
  * @param {string} destDir - The destination directory for the app.
  * @returns {Promise<void>}
  */
+
 async function scaffold(app: DBAppType, destDir: string) {
-  const template = `react-typescript`;
+  const template = `astro-react`;
+  const templateDir = pathToTemplate(template);
 
   function write(file: string, content?: string) {
     const targetPath = Path.join(destDir, file);
@@ -123,30 +125,25 @@ async function scaffold(app: DBAppType, destDir: string) {
         });
   }
 
-  const templateDir = pathToTemplate(template);
-  const files = await fs.readdir(templateDir);
-  for (const file of files.filter((f) => f !== 'package.json')) {
-    await write(file);
+  // First, copy all files except package.json
+  const files = await fs.readdir(templateDir, { withFileTypes: true });
+  for (const file of files) {
+    if (file.name === 'package.json') continue;
+    
+    const sourcePath = Path.join(templateDir, file.name);
+    if (file.isDirectory()) {
+      await copyDir(sourcePath, Path.join(destDir, file.name));
+    } else {
+      await write(file.name);
+    }
   }
 
-  const [pkgContents, idxContents] = await Promise.all([
-    fs.readFile(Path.join(templateDir, 'package.json'), 'utf-8'),
-    fs.readFile(Path.join(templateDir, 'index.html'), 'utf-8'),
-  ]);
-
+  // Handle package.json separately
+  const pkgContents = await fs.readFile(Path.join(templateDir, 'package.json'), 'utf-8');
   const pkg = JSON.parse(pkgContents);
   pkg.name = toValidPackageName(app.name);
   const updatedPkgContents = JSON.stringify(pkg, null, 2) + '\n';
-
-  const updatedIdxContents = idxContents.replace(
-    /<title>.*<\/title>/,
-    `<title>${app.name}</title>`,
-  );
-
-  await Promise.all([
-    write('package.json', updatedPkgContents),
-    write('index.html', updatedIdxContents),
-  ]);
+  await write('package.json', updatedPkgContents);
 }
 
 export async function fileUpdated(app: DBAppType, file: FileType) {
@@ -164,11 +161,17 @@ async function copy(src: string, dest: string) {
 
 async function copyDir(srcDir: string, destDir: string) {
   await fs.mkdir(destDir, { recursive: true });
-  const files = await fs.readdir(srcDir);
-  for (const file of files) {
-    const srcFile = Path.resolve(srcDir, file);
-    const destFile = Path.resolve(destDir, file);
-    await copy(srcFile, destFile);
+  const entries = await fs.readdir(srcDir, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const srcPath = Path.join(srcDir, entry.name);
+    const destPath = Path.join(destDir, entry.name);
+    
+    if (entry.isDirectory()) {
+      await copyDir(srcPath, destPath);
+    } else {
+      await fs.copyFile(srcPath, destPath);
+    }
   }
 }
 
@@ -313,6 +316,7 @@ const TEXT_FILE_EXTENSIONS = [
   '.json',
   '.css',
   '.html',
+  '.astro'
 ];
 
 export function toFileType(path: string, source: string): FileType {

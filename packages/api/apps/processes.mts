@@ -1,9 +1,9 @@
 import { ChildProcess } from 'node:child_process';
 import { pathToApp } from './disk.mjs';
-import { npmInstall as execNpmInstall, vite as execVite } from '../exec.mjs';
+import { npmInstall as execNpmInstall, vite as execVite, astro as execAstro } from '../exec.mjs';
 import { wss } from '../index.mjs';
 
-export type ProcessType = 'npm:install' | 'vite:server';
+export type ProcessType = 'npm:install' | 'vite:server' | 'astro:server';
 
 export interface NpmInstallProcessType {
   type: 'npm:install';
@@ -16,7 +16,13 @@ export interface ViteServerProcessType {
   port: number | null;
 }
 
-export type AppProcessType = NpmInstallProcessType | ViteServerProcessType;
+export interface AstroServerProcessType {
+  type: 'astro:server';
+  process: ChildProcess;
+  port: number | null;
+}
+
+export type AppProcessType = NpmInstallProcessType | ViteServerProcessType | AstroServerProcessType;
 
 class Processes {
   private map: Map<string, AppProcessType> = new Map();
@@ -46,12 +52,15 @@ const processes = new Processes();
 
 export function getAppProcess(appId: string, type: 'npm:install'): NpmInstallProcessType;
 export function getAppProcess(appId: string, type: 'vite:server'): ViteServerProcessType;
+export function getAppProcess(appId: string, type: 'astro:server'): AstroServerProcessType;
 export function getAppProcess(appId: string, type: ProcessType): AppProcessType {
   switch (type) {
     case 'npm:install':
       return processes.get(appId, type) as NpmInstallProcessType;
     case 'vite:server':
       return processes.get(appId, type) as ViteServerProcessType;
+    case 'astro:server':
+      return processes.get(appId, type) as AstroServerProcessType;
   }
 }
 
@@ -152,14 +161,72 @@ export function npmInstall(
  *
  * If there's already a process running the vite dev server, it will return that process.
  */
-export function viteServer(appId: string, options: Omit<Parameters<typeof execVite>[0], 'cwd'>) {
-  if (!processes.has(appId, 'vite:server')) {
-    processes.set(appId, {
-      type: 'vite:server',
-      process: execVite({ cwd: pathToApp(appId), ...options }),
-      port: null,
-    });
+export function viteServer(appId: string, options: Omit<Parameters<typeof execAstro>[0], 'cwd'>) {
+  const runningProcess = processes.get(appId, 'astro:server') as AstroServerProcessType;
+  
+  if (runningProcess) {
+    // If we have a running process and port, send the running status immediately
+    if (runningProcess.port) {
+      wss.broadcast(`app:${appId}`, 'preview:status', {
+        status: 'running',
+        url: `http://localhost:${runningProcess.port}`,
+      });
+    }
+    return runningProcess;
   }
 
-  return processes.get(appId, 'vite:server');
+  // Send initial booting status for new server
+  wss.broadcast(`app:${appId}`, 'preview:status', {
+    status: 'booting',
+    url: null,
+  });
+
+  const newProcess: AstroServerProcessType = {
+    type: 'astro:server',
+    process: execAstro({ cwd: pathToApp(appId), ...options }),
+    port: null,
+  };
+
+  processes.set(appId, newProcess);
+
+  newProcess.process.stdout?.on('data', (data) => {
+    const output = data.toString('utf8');
+    
+    wss.broadcast(`app:${appId}`, 'astro:server:log', {
+      log: { type: 'stdout', data: output },
+    });
+    
+    // Look for Astro's local server URL pattern
+    const localMatch = output.match(/Local\s+(http:\/\/localhost:\d+)/);
+    if (localMatch) {
+      const url = localMatch[1];
+      
+      // Extract port from URL
+      const port = parseInt(url.split(':').pop() || '');
+      newProcess.port = port;
+      
+      // Send preview:status event
+      wss.broadcast(`app:${appId}`, 'preview:status', {
+        status: 'running',
+        url: url,
+      });
+    }
+  });
+
+  newProcess.process.stderr?.on('data', (data) => {
+    const output = data.toString('utf8');
+    wss.broadcast(`app:${appId}`, 'astro:server:log', {
+      log: { type: 'stderr', data: output },
+    });
+  });
+
+  newProcess.process.on('exit', (code) => {
+    processes.del(appId, 'astro:server');
+    wss.broadcast(`app:${appId}`, 'preview:status', {
+      status: code === 0 ? 'stopped' : 'failed',
+      url: null
+    });
+  });
+
+  return newProcess;
 }

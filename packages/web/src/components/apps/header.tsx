@@ -37,7 +37,7 @@ import { exportApp } from '@/clients/http/apps';
 import { toast } from 'sonner';
 import { useLogs } from './use-logs';
 
-export type HeaderTab = 'code' | 'preview';
+export type HeaderTab = 'code' | 'preview' | 'sitemap';
 
 type PropsType = {
   className?: string;
@@ -125,6 +125,31 @@ export default function EditorHeader(props: PropsType) {
           </div>
 
           <div className="absolute left-1/2 -translate-x-1/2 flex bg-inline-code h-7 rounded-sm">
+          <button
+              className={cn(
+                'flex gap-2 justify-center items-center w-24 text-foreground rounded-sm font-medium',
+                {
+                  'bg-background border border-border': props.tab === 'sitemap',
+                },
+              )}
+              onClick={() => props.onChangeTab('sitemap')}
+            >
+              <PlayIcon size={14} />
+              Sitemap
+            </button>
+
+            <button
+              className={cn(
+                'flex gap-2 justify-center items-center w-24 text-foreground rounded-sm font-medium',
+                {
+                  'bg-background border border-border': props.tab === 'preview',
+                },
+              )}
+              onClick={() => props.onChangeTab('preview')}
+            >
+              <PlayIcon size={14} />
+              Design
+            </button>
             <button
               className={cn(
                 'flex gap-2 justify-center items-center w-24 text-foreground rounded-sm font-medium',
@@ -136,18 +161,6 @@ export default function EditorHeader(props: PropsType) {
             >
               <Code2Icon size={14} />
               Code
-            </button>
-            <button
-              className={cn(
-                'flex gap-2 justify-center items-center w-24 text-foreground rounded-sm font-medium',
-                {
-                  'bg-background border border-border': props.tab === 'preview',
-                },
-              )}
-              onClick={() => props.onChangeTab('preview')}
-            >
-              <PlayIcon size={14} />
-              Preview
             </button>
           </div>
 
