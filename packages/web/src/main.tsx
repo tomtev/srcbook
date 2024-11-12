@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import { createHashRouter, RouterProvider, Outlet } from 'react-router-dom';
 import './index.css';
 import Layout, { loader as configLoader } from './Layout';
 import LayoutNavbar from './LayoutNavbar';
@@ -27,7 +27,7 @@ posthog.init('phc_bQjmPYXmbl76j8gW289Qj9XILuu1STRnIfgCSKlxdgu', {
   person_profiles: 'identified_only',
 });
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: '/',
     element: (

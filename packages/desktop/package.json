@@ -1,0 +1,59 @@
+{
+  "name": "@srcbook/desktop",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc",
+    "start": "cross-env NODE_ENV=development electron .",
+    "build:electron": "electron-builder"
+  },
+  "dependencies": {
+    "@srcbook/web": "workspace:*",
+    "electron-is-dev": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "^29.1.0",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.0.0"
+  },
+  "build": {
+    "appId": "com.srcbook.app",
+    "productName": "SrcBook",
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../web/dist/",
+        "to": "web-build",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../api/dist/",
+        "to": "api/dist",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../api/node_modules/",
+        "to": "api/node_modules",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "resources"
+    },
+    "asar": false
+  }
+}

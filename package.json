@@ -4,17 +4,19 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
     "test": "turbo test",
     "lint": "turbo lint",
     "check-format": "prettier --check .",
     "format": "prettier --write .",
     "generate": "pnpm --filter api generate",
     "migrate": "pnpm --filter api migrate",
-    "start": "turbo start",
+    "start": "turbo run start",
     "ci:publish": "pnpm publish -r",
-    "ci:version": "pnpm changeset version"
+    "ci:version": "pnpm changeset version",
+    "desktop": "turbo run start --filter=@srcbook/desktop",
+    "desktop:build": "turbo run build --filter=@srcbook/api --filter=@srcbook/web --filter=@srcbook/desktop && turbo run build:electron --filter=@srcbook/desktop"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.8",

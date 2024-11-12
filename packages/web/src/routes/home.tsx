@@ -1,11 +1,9 @@
 import { useNavigate, useLoaderData, useRevalidator } from 'react-router-dom';
-import { AppType, CodeLanguageType, TitleCellType } from '@srcbook/shared';
+import { AppType, CodeLanguageType } from '@srcbook/shared';
 import {
   getConfig,
   createSession,
   loadSessions,
-  createSrcbook,
-  importSrcbook,
   loadSrcbookExamples,
 } from '@/lib/server';
 import type { ExampleSrcbookType, SessionType } from '@/types';
@@ -43,7 +41,7 @@ type HomeLoaderDataType = {
 };
 
 export default function Home() {
-  const { apps, defaultLanguage, baseDir } = useLoaderData() as HomeLoaderDataType;
+  const { apps, defaultLanguage } = useLoaderData() as HomeLoaderDataType;
   const navigate = useNavigate();
 
   const { revalidate } = useRevalidator();
@@ -51,37 +49,25 @@ export default function Home() {
   const [showImportSrcbookModal, setShowImportSrcbookModal] = useState(false);
   const [showGenSrcbookModal, setShowGenSrcbookModal] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-  const [srcbookToDelete, setSrcbookToDelete] = useState<SessionType | undefined>(undefined);
+  const [srcbookToDelete] = useState<SessionType | undefined>(undefined);
 
   const [appToDelete, setAppToDelete] = useState<AppType | null>(null);
   const [showCreateAppModal, setShowCreateAppModal] = useState(false);
 
   const { aiEnabled } = useSettings();
 
-  function onDeleteSrcbook(srcbook: SessionType) {
-    setSrcbookToDelete(srcbook);
-    setShowDelete(true);
-  }
 
   async function openSrcbook(path: string) {
     const { result: srcbook } = await createSession({ path });
     navigate(`/srcbooks/${srcbook.id}`);
   }
 
-  async function onCreateSrcbook(language: CodeLanguageType) {
-    const { result } = await createSrcbook({ path: baseDir, name: 'Untitled', language: language });
-    openSrcbook(result.path);
-  }
 
   async function onCreateApp(name: string, prompt?: string) {
     const { data: app } = await createApp({ name, prompt });
     navigate(`/apps/${app.id}`);
   }
 
-  async function openExampleSrcbook(example: ExampleSrcbookType) {
-    const { result } = await importSrcbook({ path: example.path });
-    openSrcbook(result.dir);
-  }
 
   if (!aiEnabled) {
     return <Onboarding />;
