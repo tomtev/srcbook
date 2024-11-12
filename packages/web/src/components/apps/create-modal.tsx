@@ -72,9 +72,9 @@ export default function CreateAppModal({ onClose, onCreate }: PropsType) {
     >
       <DialogContent className={cn('flex flex-col transition-height w-[800px]')}>
         <DialogHeader>
-          <DialogTitle>Create application</DialogTitle>
+          <DialogTitle>Create project</DialogTitle>
           <DialogDescription className="text-sm">
-            Create a web app powered by React, Vite and Tailwind.
+            Create a website powered by Astro
           </DialogDescription>
 
           {!aiEnabled && (
@@ -92,7 +92,7 @@ export default function CreateAppModal({ onClose, onCreate }: PropsType) {
         <form name="app" onSubmit={onSubmit} className="flex flex-col gap-6">
           <div className="space-y-1">
             <label htmlFor="name" className="text-sm font-medium">
-              App name
+              Project name
             </label>
             <Input
               name="app[name]"
@@ -101,7 +101,7 @@ export default function CreateAppModal({ onClose, onCreate }: PropsType) {
               autoFocus
               autoComplete="off"
               onChange={(e) => setName(e.currentTarget.value)}
-              placeholder="Spotify Light"
+              placeholder="AI SaaS Startup"
             />
           </div>
 
@@ -127,7 +127,7 @@ export default function CreateAppModal({ onClose, onCreate }: PropsType) {
               onChange={(e) => setPrompt(e.currentTarget.value)}
               onKeyDown={handleKeyDown}
               className="h-20"
-              placeholder="A Spotify-like app, showcasing a user's favorite playlists and most listened to songs."
+              placeholder="A SaaS website for my startup that sells AI-powered SEO tools"
             ></Textarea>
           </div>
 
