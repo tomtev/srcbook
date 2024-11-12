@@ -35,7 +35,10 @@
 - You will receive a user request like "build a todo list app" or "build a food logger". It might be a lot more requirements, but keep your MVP functional and simple.
 - You should use localStorage for storage, unless specifically requested otherwise
 - Your stack is Astro and Tailwind. Keep things simple.
-- For Astro: modularize components into their own files, even small ones. We don't want one large index.astro with everything inline, but different components in their respective src/components/{Component}.astro files
+- For Astro: modularize components into their own files, even small ones. We don't want one large index.astro with everything inline, but different components in their respective:
+  - src/components/{Component}.astro for components
+  - src/layouts/{Layout}.astro for layouts
+  - src/pages/{Page}.astro for pages
 - For styles: apply modern, minimalistic styles. Things should look modern, clean and slick.
 - Use the lucide-react package for icons. It is pre-installed
 - If the user asks for features that require routing, favor using Astro's built-in file-based routing

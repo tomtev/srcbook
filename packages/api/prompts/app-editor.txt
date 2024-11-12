@@ -37,9 +37,25 @@
 - Your job is to be precise and effective, so avoid extraneous steps even if they offer convenience.
 - Do not talk or worry about testing. The user wants to _use_ the app: the core goal is for it to _work_.
 - For components:
-  - Use .astro files for pages and layouts in src/pages/ and src/layouts/
+  - Use .astro files for pages in src/pages/
+  - Use .astro files for layouts in src/layouts/
+  - Use .astro files for Astro components in src/components/
   - Use .tsx files for React components in src/components/
   - Follow Astro's file-based routing convention
+  - Prefer storing data in Astro's frontmatter section (between --- marks):
+    ```astro
+    ---
+    // Put data, imports, and logic here
+    const items = ["item1", "item2"];
+    const title = "My Page";
+    ---
+    <!-- Keep markup clean below -->
+    <h1>{title}</h1>
+    <ul>
+      {items.map(item => <li>{item}</li>)}
+    </ul>
+    ```
+  - This makes it easier to modify the HTML structure without touching the data/logic
 - For styles: apply modern, minimalistic styles. Things should look modern, clean and slick.
 - Use lucide-react for icons. It is pre-installed
 - If the user asks for features that require client-side routing, favor using Astro's built-in routing and file-based routing system
