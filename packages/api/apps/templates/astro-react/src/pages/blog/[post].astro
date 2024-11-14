@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { db, Post, eq } from 'astro:db';
+
+const { post: slug } = Astro.params;
+
+const post = await db.select().from(Post).where(eq(Post.slug, slug)).get();
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+---
+
+<Layout>
+  <article class="max-w-3xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-bold tracking-tight text-foreground mb-4">
+      {post.title}
+    </h1>
+    
+    <p class="text-sm text-muted-foreground mb-8 border-b border-border pb-4">
+      By {post.author} • {new Date(post.publishedAt).toLocaleDateString()}
+    </p>
+    
+    <div class="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-card-foreground prose-a:text-primary hover:prose-a:text-primary/80 max-w-none">
+      {post.content}
+    </div>
+  </article>
+</Layout>

@@ -1,0 +1,59 @@
+---
+interface Props {
+  label: string;
+  path: string;
+  icon?: string;
+  isActive?: boolean;
+  variant?: 'default' | 'subtle';
+  size?: 'small' | 'medium' | 'large';
+  class?: string;
+}
+
+const { 
+  label, 
+  path, 
+  icon, 
+  isActive: propIsActive = false,
+  variant = 'default',
+  size = 'medium',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const pathname = new URL(Astro.request.url).pathname;
+const currentPath = pathname.slice(1); // remove the first "/"
+
+// Create new variable instead of reassigning
+const isActive = currentPath === path.slice(1) || propIsActive;
+
+const variants = {
+  default: 'text-foreground/50 hover:text-foreground',
+  subtle: 'text-muted-foreground hover:text-foreground',
+};
+
+const sizes = {
+  small: 'text-sm px-2 py-1.5',
+  medium: 'text-base px-2 py-2',
+  large: 'text-lg px-4 py-3',
+};
+---
+
+<a
+  href={path}
+  class:list={[
+    'flex items-center gap-2 rounded-md transition-colors',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    variants[variant],
+    sizes[size],
+    { '!text-foreground': isActive },
+    className
+  ]}
+  {...rest}
+>
+  {icon && (
+    <span class="text-xl">
+      <i class={icon}></i>
+    </span>
+  )}
+  <span>{label}</span>
+</a>

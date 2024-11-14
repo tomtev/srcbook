@@ -1,0 +1,57 @@
+---
+interface Props {
+  variant?: 'default' | 'outline' | 'link';
+  size?: 'small' | 'medium' | 'large';
+  class?: string;
+  href?: string;
+}
+
+const { 
+  variant = 'default',
+  size = 'medium',
+  class: className,
+  href,
+  ...rest
+} = Astro.props;
+
+const variants = {
+  default: 'bg-primary text-white hover:bg-primary/80 border border-transparent',
+  outline: 'border border-primary text-primary hover:bg-primary-50',
+  link: 'text-current hover:opacity-80 border border-transparent',
+};
+
+const sizes = {
+  small: 'px-3 py-1.5 text-sm',
+  medium: 'px-4 py-2 text-base',
+  large: 'px-6 py-3 text-lg',
+};
+---
+
+{
+  href ? (
+    <a
+      href={href}
+      class:list={[
+        'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-50',
+        variants[variant],
+        sizes[size],
+        className
+      ]}
+      {...rest}
+    >
+      <slot />
+    </a>
+  ) : (
+    <button
+      class:list={[
+        'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-50',
+        variants[variant],
+        sizes[size],
+        className
+      ]}
+      {...rest}
+    >
+      <slot />
+    </button>
+  )
+}
